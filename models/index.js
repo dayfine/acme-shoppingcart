@@ -4,8 +4,7 @@ const
   LineItem = require('./LineItem'),
   Product = require('./Product')
 
-Product.belongsTo(LineItem)
-LineItem.hasOne(Product)
+LineItem.belongsTo(Product)
 LineItem.belongsTo(Order)
 Order.hasMany(LineItem)
 
@@ -20,6 +19,7 @@ module.exports = {
   seed,
   models: {
     Order,
+    LineItem,
     Product
   }
 }

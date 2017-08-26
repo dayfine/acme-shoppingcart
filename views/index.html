@@ -9,7 +9,7 @@
         <ul class='list-group'>
         {% for product in products %}
           <li class = 'list-group-item row'>
-            <form action='/{{currentOrder.id}}/lineItems' method ='POST'>
+            <form action='/{{openOrder.id}}/lineItems' method ='POST'>
               {{product.name}}
               <input type='hidden' name="productId" value="{{product.id}}">
               <button class='btn btn-primary btn-sm pull-right'>
@@ -21,23 +21,66 @@
         </ul>
       </div>
       <div class='col-md-4'>
+
         <h3>Your Cart</h3>
-        {% if currentOrder.id %}
-        <div class='panel well'>
-        {% for lineItem in currentOrder.lineItems %}
-          {{lineItem.Product.name}}
-          {{lineItem.quantity}}
+
+        {% if openOrder.lineItems.length > 0 %}
+        <ul class='list-group well'>
+        {% for lineItem in openOrder.lineItems %}
+          <li class = 'list-group-item row'>
+            <div class='col-md-8'>
+              <strong>{{lineItem.product.name}}</strong>
+            </div>
+            <div class='col-md-4'>
+              <div class='text-right'>{{lineItem.quantity}}</div>
+            </div>
+          </li>
         {% endfor %}
-        </div>
-        {% endif %}
+        </ul>
+
         <div class='panel well'>
-          <form action='/{{currentOrder.id}}' method ='PUT'>
+          <form action='/{{openOrder.id}}?_method=PUT' method ='POST'>
             <input name='address' type='text'>
             <button class='btn btn-success btn-sm pull-right'>
               Submit Order
             </button>
           </form>
         </div>
+        {% endif %}
+
+        {% if closedOrders.length > 0 %}
+        <div class='panel panel-success'>
+
+        <div class='panel-heading'>
+          Prior Orders
+        </div>
+        <ul class='list-group panel-body'>
+        {% for order in closedOrders %}
+          <div class='panel panel-info'>
+            <div class='panel-heading'>
+              Order #{{order.id}}
+            </div>
+
+            <ul class='list-group panel-body'>
+            {% for lineItem in order.lineItems %}
+              <li class = 'list-group-item row'>
+                <div class='col-md-8'>
+                  <strong>{{lineItem.product.name}}</strong>
+                </div>
+                <div class='col-md-4'>
+                  <div class='text-right'>{{lineItem.quantity}}</div>
+                </div>
+              </li>
+            {% endfor %}
+            </ul>
+          </div>
+        {% endfor %}
+        </ul>
+
+        </div>
+        {% endif %}
+
+
       </div>
     </div>
   </div>

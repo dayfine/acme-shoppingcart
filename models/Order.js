@@ -10,12 +10,13 @@ const Order = conn.define('order', {
   },
   address: {
     type: conn.Sequelize.STRING,
-    defaultValue: null
+    AllowNull: false
   }
 })
 
 Order.updateFromRequestBody = function (OrderId, address) {
-  Order.find({where: {id: OrderId}})
+  return Order
+  .find({where: {id: OrderId}})
   .then(order => {
     order.address = address
     order.isCart = false
@@ -23,27 +24,36 @@ Order.updateFromRequestBody = function (OrderId, address) {
   })
 }
 
-Order.addProductToCart = function (id) {
-  let product
-  Product.find({id})
-  .then(_product => {
-    product = _product
-    return _product.getLineItem()
-  })
-  .then(lineItem => {
-    if (lineItem) return lineItem.quantity++
-
-    let _lineItem
-    return LineItem.create()
-    .then(lineItem => {
-      Order.find({where: {isCart: true}})
-      // product.setLineItem(lineItem)
+Order.addProductToCart = function (productId) {
+  return LineItem
+    .find({
+      where: {productId},
+      include: [{ model: Order, where: {isCart: true} }]
     })
-  })
+    .then(lineItem => {
+      console.log(lineItem)
+      if (lineItem) {
+        return lineItem.update({quantity: conn.Sequelize.literal('quantity +1')})
+      } else {
+        return LineItem.create()
+        .then(lineItem => {
+          return Promise.all([
+            Order.find({where: {isCart: true}}),
+            Product.find({where: {id: productId}})
+          ])
+          .then(([order, product]) => {
+            return Promise.all([
+              lineItem.setOrder(order),
+              lineItem.setProduct(product)
+            ])
+          })
+        })
+      }
+    })
 }
 
 Order.destroyLineItem = function (OrderId, LineId) {
-  LineItem.find({id: LineId})
+  return LineItem.find({id: LineId})
   .then(lineItem => lineItem.destroy())
 }
 

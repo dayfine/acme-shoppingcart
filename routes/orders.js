@@ -1,30 +1,49 @@
 const
-  { Order, Product } = require('../models').models,
+  { Order, LineItem, Product } = require('../models').models,
   router = require('express').Router(),
   bodyParser = require('body-parser')
-
-let currentOrder
 
 router
   .use(bodyParser.urlencoded({extended: false}))
 
   .use('/', (req, res, next) => {
-    Order.find({where: {isCart: true}})
-    .then(order => {
-      currentOrder = order
+    let
+      openOrder = Order.find({
+        where: {isCart: true},
+        include: [{ model: LineItem,
+          include: [{ model: Product }]
+        }]
+      })
+      .then(result => {
+        return result || Order.create()
+      }),
+      closedOrders = Order.findAll({
+        where: {isCart: false},
+        include: [{ model: LineItem,
+          include: [{ model: Product }]
+        }]
+      })
+
+    Promise.all([openOrder, closedOrders])
+    .then(([openOrder, closedOrders]) => {
+      req.openOrder = openOrder
+      req.closedOrders = closedOrders
       next()
     })
     .catch(next)
   })
 
   .get('/', (req, res, next) => {
-    console.log(currentOrder)
+    const openOrder = req.openOrder, closedOrders = req.closedOrders
+    // console.log('open', openOrder)
+    // console.log('closed', closedOrders)
     Product.findAll({order: [['id']]})
-    .then((products) => res.render('index', {products, currentOrder}))
+    .then((products) => res.render('index', {products, openOrder, closedOrders}))
     .catch(next)
   })
 
   .put('/:id', (req, res, next) => {
+    console.log('body', req.body)
     Order.updateFromRequestBody(req.params.id, req.body.address)
     .then(() => res.redirect('/'))
     .catch(ex => {
@@ -36,7 +55,6 @@ router
   })
 
   .post('/:id/lineItems', (req, res, next) => {
-    console.log('body', req.body)
     Order.addProductToCart(req.body.productId * 1)
     .then(() => res.redirect('/'))
     .catch(next)
