@@ -43,7 +43,6 @@ router
   })
 
   .put('/:id', (req, res, next) => {
-    console.log('body', req.body)
     Order.updateFromRequestBody(req.params.id, req.body.address)
     .then(() => res.redirect('/'))
     .catch(ex => {

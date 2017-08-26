@@ -31,7 +31,6 @@ Order.addProductToCart = function (productId) {
       include: [{ model: Order, where: {isCart: true} }]
     })
     .then(lineItem => {
-      console.log(lineItem)
       if (lineItem) {
         return lineItem.update({quantity: conn.Sequelize.literal('quantity +1')})
       } else {
@@ -53,7 +52,7 @@ Order.addProductToCart = function (productId) {
 }
 
 Order.destroyLineItem = function (OrderId, LineId) {
-  return LineItem.find({id: LineId})
+  return LineItem.find({where: {id: LineId}})
   .then(lineItem => lineItem.destroy())
 }
 
