@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+  <div class='container'>
+    <div class='row'>
+      <div class='col-md-8'>
+        <h3>Check Out Our Products!</h3>
+        <ul class='list-group'>
+        {% for product in products %}
+          <li class = 'list-group-item row'>
+            <form action='/{{currentOrder.id}}/lineItems' method ='POST'>
+              {{product.name}}
+              <input type='hidden' name="productId" value="{{product.id}}">
+              <button class='btn btn-primary btn-sm pull-right'>
+                Add To Cart
+              </button>
+            </form>
+          </li>
+        {% endfor %}
+        </ul>
+      </div>
+      <div class='col-md-4'>
+        <h3>Your Cart</h3>
+        {% if currentOrder.id %}
+        <div class='panel well'>
+        {% for lineItem in currentOrder.lineItems %}
+          {{lineItem.Product.name}}
+          {{lineItem.quantity}}
+        {% endfor %}
+        </div>
+        {% endif %}
+        <div class='panel well'>
+          <form action='/{{currentOrder.id}}' method ='PUT'>
+            <input name='address' type='text'>
+            <button class='btn btn-success btn-sm pull-right'>
+              Submit Order
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

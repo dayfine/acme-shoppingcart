@@ -1,0 +1,10 @@
+
+{% extends "layout.html" %}
+
+{% block content %}
+  <div class = 'container'>
+    <h3>{{error.message}}</h3>
+    <h5>{{error.status}}</h5>
+    <pre>{{error.stack}}</pre>
+  </div>
+{% endblock %}
