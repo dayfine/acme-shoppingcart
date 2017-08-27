@@ -10,7 +10,10 @@ const Order = conn.define('order', {
   },
   address: {
     type: conn.Sequelize.STRING,
-    AllowNull: false
+    AllowNull: false,
+    validate: {
+      notEmpty: true
+    }
   }
 })
 
