@@ -49,8 +49,9 @@
         </ul>
 
         <div class='panel well'>
+          {% if error %}<p class="text-warning">Address Required</p>{% endif %}
           <form action='/{{openOrder.id}}?_method=PUT' method ='POST'>
-            <input name='address' type='text'>
+            <input name='address' type='text' placeholder='Address'>
             <button class='btn btn-success btn-sm pull-right'>
               Submit Order
             </button>

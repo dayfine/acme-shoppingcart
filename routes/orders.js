@@ -19,35 +19,35 @@ router
       }),
       closedOrders = Order.findAll({
         where: {isCart: false},
+        order: [['id']],
         include: [{ model: LineItem,
           include: [{ model: Product }]
         }]
+      }),
+      products = Product.findAll({
+        order: [['id']]
       })
 
-    Promise.all([openOrder, closedOrders])
-    .then(([openOrder, closedOrders]) => {
-      req.openOrder = openOrder
-      req.closedOrders = closedOrders
+    Promise.all([openOrder, closedOrders, products])
+    .then(([openOrder, closedOrders, products]) => {
+      res.locals.openOrder = openOrder
+      res.locals.closedOrders = closedOrders
+      res.locals.products = products
       next()
     })
     .catch(next)
   })
 
   .get('/', (req, res, next) => {
-    const openOrder = req.openOrder, closedOrders = req.closedOrders
-    // console.log('open', openOrder)
-    // console.log('closed', closedOrders)
-    Product.findAll({order: [['id']]})
-    .then((products) => res.render('index', {products, openOrder, closedOrders}))
-    .catch(next)
+    res.render('index')
   })
 
   .put('/:id', (req, res, next) => {
     Order.updateFromRequestBody(req.params.id, req.body.address)
     .then(() => res.redirect('/'))
     .catch(ex => {
-      if (ex.message === 'address required') {
-        return res.render('error', { error: ex })
+      if (ex.message === 'Validation error: Validation notEmpty on address failed') {
+        return res.render('index', { error: ex })
       }
       next(ex)
     })
